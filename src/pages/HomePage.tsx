@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
+import './styles.css';
+import logo from '../pages/background2.jpg'
 
 interface Task {
   id: number;
@@ -19,6 +21,7 @@ const HomePage: React.FC = () => {
     description: '',
     status: 'pending',
   });
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
 
   useEffect(() => {
     fetchTasks();
@@ -72,25 +75,44 @@ const HomePage: React.FC = () => {
     setShowModal(false);
   };
 
+  const selectRandomBackground = () => {
+    const backgrounds = ['background-image1.jpg', 'background-image2.jpg', 'background-image3.jpg'];
+    const randomIndex = Math.floor(Math.random() * backgrounds.length);
+    const randomBackground = backgrounds[randomIndex];
+    setBackgroundImage(randomBackground);
+  };
+
   return (
-    <div>
-      <Button variant="primary" onClick={handleNewTask}>
-        Criar Nova Task
-      </Button>
+    <div className='main'>
+      <div className='imgDiv'>
+        <img src={logo} className='img'/>
+      </div>
+      <div className='buttonDiv'>
+        <Button variant="primary" onClick={handleNewTask} className='button'>
+          Criar Nova Task
+        </Button>
+      </div>
 
       <div className="card-list">
         {tasks.map((task) => (
-          <Card key={task.id} style={{ width: '18rem', margin: '10px' }}>
-            <Card.Body>
-              <Card.Title>{task.title}</Card.Title>
-              <Card.Text>{task.description}</Card.Text>
-              <Button variant="primary" onClick={() => handleEditTask(task)}>
-                Editar
-              </Button>
-              <Button variant="danger" onClick={() => handleDeleteTask(task.id)}>
-                Excluir
-              </Button>
-            </Card.Body>
+          <Card key={task.id} className={`card ${backgroundImage ? 'custom-background' : ''}`}>
+            <div>
+              <div className='statusColorDiv'>
+                <div className='status'>{task.status}</div>
+                <div className={`statusColor ${task.status.toLowerCase()}`}></div>
+              </div>
+
+              <div className='title'>{task.title}</div>
+              <div className='text'>{task.description}</div>
+              <div className='button'>
+                <Button variant="primary" onClick={() => handleEditTask(task)}>
+                  Editar
+                </Button>
+                <Button variant="danger" onClick={() => handleDeleteTask(task.id)}>
+                  Excluir
+                </Button>
+              </div>
+            </div>
           </Card>
         ))}
       </div>
@@ -100,6 +122,9 @@ const HomePage: React.FC = () => {
         <div className="modal-container">
           <Modal.Header closeButton>
             <Modal.Title>{selectedTask ? 'Editar Task' : 'Criar Nova Task'}</Modal.Title>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              Sair
+            </Button>
           </Modal.Header>
           <Modal.Body>
             <Form.Group controlId="formTitle">
@@ -127,9 +152,22 @@ const HomePage: React.FC = () => {
                 value={newTask.status}
                 onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
               >
-                <option value="pending">Pendente</option>
-                <option value="completed">Concluído</option>
+                <option value="Pending">Pendente</option>
+                <option value="Completed">Concluído</option>
+                <option value="Doing">Fazendo</option>
               </Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId="formBackground">
+              <Form.Label>Plano de Fundo</Form.Label>
+              <div className="background-images">
+                <img src="background1.jpg" alt="Background 1" onClick={() => setBackgroundImage('background1.jpg')} />
+                <img src="background2.jpg" alt="Background 2" onClick={() => setBackgroundImage('background2.jpg')} />
+                <img src="background3.jpg" alt="Background 3" onClick={() => setBackgroundImage('background3.jpg')} />
+              </div>
+              <Button variant="primary" onClick={selectRandomBackground}>
+                Selecionar Aleatoriamente
+              </Button>
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
@@ -142,36 +180,6 @@ const HomePage: React.FC = () => {
           </Modal.Footer>
         </div>
       </Modal>
-
-      <style jsx>{`
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          z-index: 999;
-        }
-
-        .modal-container {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background-color: white;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          z-index: 1000;
-        }
-        .card-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px;
-          }
-      `}</style>
     </div>
   );
 };
